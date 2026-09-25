@@ -1,38 +1,40 @@
 package com.restaurant.pos.friend2.model;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 /**
- * OrderItem domain model - a single line item within an Order.
- * itemId references a menu item owned by another module (Friend 1/3);
- * this class does not know or care about that module's internals.
+ * Plain domain model representing a temporary stock reservation
+ * held against an Order for a given ingredient. ingredientId
+ * references Friend 1's Ingredient primary key, but this class
+ * does NOT depend on Friend 1's Ingredient class (loose coupling).
  */
-public class OrderItem {
+public class Reservation {
 
-    private Long id;
+    private Long reservationId;
     private Long orderId;
-    private Long itemId;
-    private Integer quantity;
-    private BigDecimal price;
+    private Long ingredientId;
+    private BigDecimal reservedQuantity;
+    private ReservationStatus status;
 
-    public OrderItem() {
+    public Reservation() {
+        this.status = ReservationStatus.ACTIVE;
     }
 
-    public OrderItem(Long id, Long orderId, Long itemId, Integer quantity, BigDecimal price) {
-        this.id = id;
+    public Reservation(Long reservationId, Long orderId, Long ingredientId,
+                        BigDecimal reservedQuantity, ReservationStatus status) {
+        this.reservationId = reservationId;
         this.orderId = orderId;
-        setItemId(itemId);
-        setQuantity(quantity);
-        setPrice(price);
+        setIngredientId(ingredientId);
+        setReservedQuantity(reservedQuantity);
+        this.status = status == null ? ReservationStatus.ACTIVE : status;
     }
 
-    public Long getId() {
-        return id;
+    public Long getReservationId() {
+        return reservationId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setReservationId(Long reservationId) {
+        this.reservationId = reservationId;
     }
 
     public Long getOrderId() {
@@ -43,64 +45,47 @@ public class OrderItem {
         this.orderId = orderId;
     }
 
-    public Long getItemId() {
-        return itemId;
+    public Long getIngredientId() {
+        return ingredientId;
     }
 
-    public void setItemId(Long itemId) {
-        if (itemId == null) {
-            throw new IllegalArgumentException("itemId is required");
+    public void setIngredientId(Long ingredientId) {
+        if (ingredientId == null) {
+            throw new IllegalArgumentException("ingredientId must not be null");
         }
-        this.itemId = itemId;
+        this.ingredientId = ingredientId;
     }
 
-    public Integer getQuantity() {
-        return quantity;
+    public BigDecimal getReservedQuantity() {
+        return reservedQuantity;
     }
 
-    public void setQuantity(Integer quantity) {
-        if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("quantity must be a positive integer");
+    public void setReservedQuantity(BigDecimal reservedQuantity) {
+        if (reservedQuantity == null || reservedQuantity.signum() < 0) {
+            throw new IllegalArgumentException("reservedQuantity must not be null or negative");
         }
-        this.quantity = quantity;
+        this.reservedQuantity = reservedQuantity;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public ReservationStatus getStatus() {
+        return status;
     }
 
-    public void setPrice(BigDecimal price) {
-        if (price == null || price.signum() < 0) {
-            throw new IllegalArgumentException("price must not be negative");
+    public void setStatus(ReservationStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("status must not be null");
         }
-        this.price = price;
-    }
-
-    public BigDecimal getSubtotal() {
-        return price.multiply(BigDecimal.valueOf(quantity));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OrderItem)) return false;
-        OrderItem that = (OrderItem) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+        this.status = status;
     }
 
     @Override
     public String toString() {
-        return "OrderItem{" +
-                "id=" + id +
+        return "Reservation{" +
+                "reservationId=" + reservationId +
                 ", orderId=" + orderId +
-                ", itemId=" + itemId +
-                ", quantity=" + quantity +
-                ", price=" + price +
+                ", ingredientId=" + ingredientId +
+                ", reservedQuantity=" + reservedQuantity +
+                ", status=" + status +
                 '}';
     }
 }

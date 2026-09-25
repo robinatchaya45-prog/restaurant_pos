@@ -1,15 +1,10 @@
-Package com.restaurant.pos.friend2.model;
-
-import java.util.Objects;
-import java.util.regex.Pattern;
+package com.restaurant.pos.friend2.model;
 
 /**
- * Customer domain model.
- * Owned by Friend 2 - do not duplicate elsewhere in the codebase.
+ * Plain domain model representing a restaurant customer.
+ * No SQL / persistence logic belongs here (see CustomerRepository).
  */
 public class Customer {
-
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9+\\-() ]{7,20}$");
 
     private Long customerId;
     private String name;
@@ -19,9 +14,9 @@ public class Customer {
     }
 
     public Customer(Long customerId, String name, String phone) {
+        setCustomerId(customerId);
         setName(name);
         setPhone(phone);
-        this.customerId = customerId;
     }
 
     public Customer(String name, String phone) {
@@ -44,8 +39,8 @@ public class Customer {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Customer name must not be empty");
         }
-        if (name.trim().length() > 150) {
-            throw new IllegalArgumentException("Customer name is too long");
+        if (name.trim().length() > 100) {
+            throw new IllegalArgumentException("Customer name is too long (max 100 characters)");
         }
         this.name = name.trim();
     }
@@ -59,23 +54,10 @@ public class Customer {
             throw new IllegalArgumentException("Customer phone must not be empty");
         }
         String trimmed = phone.trim();
-        if (!PHONE_PATTERN.matcher(trimmed).matches()) {
+        if (!trimmed.matches("^[+]?[0-9\\-\\s]{7,15}$")) {
             throw new IllegalArgumentException("Customer phone number is invalid");
         }
         this.phone = trimmed;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Customer)) return false;
-        Customer customer = (Customer) o;
-        return Objects.equals(customerId, customer.customerId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(customerId);
     }
 
     @Override

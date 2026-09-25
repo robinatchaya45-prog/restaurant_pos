@@ -1,12 +1,11 @@
 package com.restaurant.pos.friend2.model;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 /**
- * OrderItem domain model - a single line item within an Order.
- * itemId references a menu item owned by another module (Friend 1/3);
- * this class does not know or care about that module's internals.
+ * Plain domain model representing a single line item of an Order.
+ * itemId references Friend 1's MenuItem primary key, but this class
+ * does NOT depend on Friend 1's MenuItem class (loose coupling).
  */
 public class OrderItem {
 
@@ -49,7 +48,7 @@ public class OrderItem {
 
     public void setItemId(Long itemId) {
         if (itemId == null) {
-            throw new IllegalArgumentException("itemId is required");
+            throw new IllegalArgumentException("itemId must not be null");
         }
         this.itemId = itemId;
     }
@@ -60,7 +59,7 @@ public class OrderItem {
 
     public void setQuantity(Integer quantity) {
         if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("quantity must be a positive integer");
+            throw new IllegalArgumentException("quantity must be a positive number");
         }
         this.quantity = quantity;
     }
@@ -71,26 +70,13 @@ public class OrderItem {
 
     public void setPrice(BigDecimal price) {
         if (price == null || price.signum() < 0) {
-            throw new IllegalArgumentException("price must not be negative");
+            throw new IllegalArgumentException("price must not be null or negative");
         }
         this.price = price;
     }
 
     public BigDecimal getSubtotal() {
         return price.multiply(BigDecimal.valueOf(quantity));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OrderItem)) return false;
-        OrderItem that = (OrderItem) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 
     @Override

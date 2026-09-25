@@ -1,31 +1,47 @@
-e com.restaurant.pos.friend2.model;
+package com.restaurant.pos.friend2.model;
 
-import java.util.Objects;
-import java.util.regex.Pattern;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
- * Customer domain model.
- * Owned by Friend 2 - do not duplicate elsewhere in the codebase.
+ * Plain domain model representing a customer Order.
+ * No SQL / persistence logic belongs here (see OrderRepository).
  */
-public class Customer {
+public class Order {
 
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9+\\-() ]{7,20}$");
-
+    private Long orderId;
     private Long customerId;
-    private String name;
-    private String phone;
+    private Integer tableNo;
+    private LocalDateTime orderTime;
+    private LocalDateTime lockTime;
+    private LocalDateTime finishTime;
+    private OrderStatus status;
+    private BigDecimal totalAmount;
 
-    public Customer() {
+    public Order() {
+        this.status = OrderStatus.PENDING;
+        this.totalAmount = BigDecimal.ZERO;
     }
 
-    public Customer(Long customerId, String name, String phone) {
-        setName(name);
-        setPhone(phone);
+    public Order(Long orderId, Long customerId, Integer tableNo, LocalDateTime orderTime,
+                 LocalDateTime lockTime, LocalDateTime finishTime, OrderStatus status,
+                 BigDecimal totalAmount) {
+        this.orderId = orderId;
         this.customerId = customerId;
+        setTableNo(tableNo);
+        this.orderTime = orderTime;
+        this.lockTime = lockTime;
+        this.finishTime = finishTime;
+        this.status = status == null ? OrderStatus.PENDING : status;
+        this.totalAmount = totalAmount == null ? BigDecimal.ZERO : totalAmount;
     }
 
-    public Customer(String name, String phone) {
-        this(null, name, phone);
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
     public Long getCustomerId() {
@@ -33,57 +49,87 @@ public class Customer {
     }
 
     public void setCustomerId(Long customerId) {
+        if (customerId == null) {
+            throw new IllegalArgumentException("customerId is mandatory");
+        }
         this.customerId = customerId;
     }
 
-    public String getName() {
-        return name;
+    public Integer getTableNo() {
+        return tableNo;
     }
 
-    public void setName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Customer name must not be empty");
+    /**
+     * tableNo is mandatory: the customer must enter a table number
+     * before an order can be placed.
+     */
+    public void setTableNo(Integer tableNo) {
+        if (tableNo == null) {
+            throw new IllegalArgumentException("tableNo is mandatory");
         }
-        if (name.trim().length() > 150) {
-            throw new IllegalArgumentException("Customer name is too long");
+        if (tableNo <= 0) {
+            throw new IllegalArgumentException("tableNo must be a positive number");
         }
-        this.name = name.trim();
+        this.tableNo = tableNo;
     }
 
-    public String getPhone() {
-        return phone;
+    public LocalDateTime getOrderTime() {
+        return orderTime;
     }
 
-    public void setPhone(String phone) {
-        if (phone == null || phone.trim().isEmpty()) {
-            throw new IllegalArgumentException("Customer phone must not be empty");
+    public void setOrderTime(LocalDateTime orderTime) {
+        this.orderTime = orderTime;
+    }
+
+    public LocalDateTime getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(LocalDateTime lockTime) {
+        this.lockTime = lockTime;
+    }
+
+    public LocalDateTime getFinishTime() {
+        return finishTime;
+    }
+
+    public void setFinishTime(LocalDateTime finishTime) {
+        this.finishTime = finishTime;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("status must not be null");
         }
-        String trimmed = phone.trim();
-        if (!PHONE_PATTERN.matcher(trimmed).matches()) {
-            throw new IllegalArgumentException("Customer phone number is invalid");
+        this.status = status;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        if (totalAmount == null || totalAmount.signum() < 0) {
+            throw new IllegalArgumentException("totalAmount must not be null or negative");
         }
-        this.phone = trimmed;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Customer)) return false;
-        Customer customer = (Customer) o;
-        return Objects.equals(customerId, customer.customerId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(customerId);
+        this.totalAmount = totalAmount;
     }
 
     @Override
     public String toString() {
-        return "Customer{" +
-                "customerId=" + customerId +
-                ", name='" + name + '\'' +
-                ", phone='" + phone + '\'' +
+        return "Order{" +
+                "orderId=" + orderId +
+                ", customerId=" + customerId +
+                ", tableNo=" + tableNo +
+                ", orderTime=" + orderTime +
+                ", lockTime=" + lockTime +
+                ", finishTime=" + finishTime +
+                ", status=" + status +
+                ", totalAmount=" + totalAmount +
                 '}';
     }
 }
